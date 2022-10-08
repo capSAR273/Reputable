@@ -373,13 +373,16 @@ function Reputable:setDailyOffest( setOffset, announce )
 
 	local stUTCdiff = math.floor( (time(dt1)-time(dt4))/3600 + 0.5 )
 	local serverRestTime = math.floor( ( time(dt1) + GetQuestResetTime() + 1 ) / 3600 + 0.5 ) * 3600
-	local dailyChangeOffset = setOffset or Reputable.dailyChangeOffset[ stUTCdiff ] or 0
+	local dailyTBCChangeOffset = setOffset or Reputable.dailyTBCChangeOffset[ stUTCdiff ] or 0
+	local dailyWOTLKChangeOffset = setOffset or Reputable.dailyWOTLKChangeOffset[ stUTCdiff ] or 0
 	
-	Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset = dailyChangeOffset
+	Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyTBCChangeOffset = dailyChangeOffset
+	Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKChangeOffset = dailyChangeOffset
 	local nextChange = GetQuestResetTime() + 3600 * dailyChangeOffset
 	if nextChange > 86400 then nextChange = nextChange - 86400 end
-	Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeTime = time() + nextChange
-	Reputable:resetDailies( true )
+	Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyChangeTime = time() + nextChange
+	Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyChangeTime = time() + nextChange
+	--Reputable:resetDailies( true )
 	
 	if announce then
 		print( "|cFF8080FFReputable: |rv", version, "|cFF8080FFRealm:|r", Reputable.server, "|cFF8080FFUTC offset:|r", stUTCdiff )
@@ -399,9 +402,11 @@ function SlashCmdList.REPUTABLE(msg, ...)
 	elseif cmd == "debug" then
 		debug( "toggle" )
 	elseif cmd == "dailyreset" then
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyResetTime = 0
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeTime = 0
-		Reputable:resetDailies( true )
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyResetTime = 0
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyChangeTime = 0
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyResetTime = 0
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyChangeTime = 0
+		--Reputable:resetDailies( true )
 		Reputable:guiUpdate( true )
 	elseif msg == "test" then
 		local randomtime = (math.random(100)+20 ) /100
@@ -461,7 +466,7 @@ end
 
 function Reputable:sendAddonMessage( all, channel, ignore, responseNeeded )
 	if not Reputable.addonMessagePrefixRegistered then return end 
-	Reputable:resetDailies(false) -- Checks if dailies need to be reset
+	--Reputable:resetDailies(false) -- Checks if dailies need to be reset
 	
 	local nextChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset
 	if nextChange > 86400 then nextChange = nextChange - 86400 end
@@ -471,33 +476,55 @@ function Reputable:sendAddonMessage( all, channel, ignore, responseNeeded )
 	if ignore and ignore == "RAID" then ignore = "PARTY" end
 	local action = "send"
 	local missingData = false
-	local dND, dNDR, dHD, dHDR, dCQ, dCQR, dFQ, dFQR, dPvPQ, dPvPQR = "", "", "", "", "", "", "", "", "", ""
+	local dNDWOTLK, dNDRWOTLK, dHDWOTLK, dHDRWOTLK, dCQWOTLK, dCQRWOTLK, dFQWOTLK, dFQRWOTLK, dPvPQWOTLK, dPvPQRWOTLK
+	dNDTBC, dNDRTBC, dHDTBC, dHDRTBC, dCQTBC, dCQRTBC, dFQTBC, dFQRTBC, dPvPQTBC, dPvPQRTBC = "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
 	
-	if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeon then
-		dND    = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeon
-		dNDR   = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeonReset
+	if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKNormalDungeon then
+		dNDWOTLK    = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKNormalDungeon
+		dNDRWOTLK   = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKNormalDungeonReset
 	end
-	if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeon then
-		dHD    = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeon
-		dHDR   = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeonReset
+	if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKHeroicDungeon then
+		dHDWOTLK    = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKHeroicDungeon
+		dHDRWOTLK   = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKHeroicDungeonReset
 	end
-	if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuest then
-		dCQ    = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuest
-		dCQR   = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuestReset
+	if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKCookingQuest then
+		dCQWOTLK    = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKCookingQuest
+		dCQRWOTLK   = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKCookingQuestReset
 	end
-	if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuest then
-		dFQ    = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuest
-		dFQR   = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuestReset
+	if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuest then
+		dFQWOTLK    = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuest
+		dFQRWOTLK   = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuestReset
 	end
-	if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuest then
-		dPvPQ  = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuest
-		dPvPQR = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuestReset
+	if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyPvPQuest then
+		dPvPQWOTLK  = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKPvPQuest
+		dPvPQRWOTLK = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyWOTLKPvPQuestReset
+	end
+
+	if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeon then
+		dNDTBC    = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeon
+		dNDRTBC   = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeonReset
+	end
+	if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeon then
+		dHDTBC    = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeon
+		dHDRTBC   = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeonReset
+	end
+	if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuest then
+		dCQTBC    = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuest
+		dCQRTBC   = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuestReset
+	end
+	if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuest then
+		dFQTBC    = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuest
+		dFQRTBC   = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuestReset
+	end
+	if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyPvPQuest then
+		dPvPQTBC  = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyTBCPvPQuest
+		dPvPQRTBC = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyTBCPvPQuestReset
 	end
 	
-	if dND == "" or dHD == "" or dCQ == "" or dFQ == "" or dPvPQ == "" then missingData = true end
+	if dNDWOTLK == "" or dHDWOTLK == "" or dCQWOTLK == "" or dFQWOTLK == "" or dPvPQTBC == "" or dNDTBC == "" or dHDTBC == "" or dCQTBC == "" or dFQTBC == "" or dPvPQTBC == "" then missingData = true end
 	
-	local message = action..":"..version..":"..dND..":"..dNDR..":"..dHD..":"..dHDR..":"..dCQ..":"..dCQR..":"..dFQ..":"..dFQR..":"..dPvPQ..":"..dPvPQR
-	local msgQuests = dND..":"..dHD..":"..dCQ..":"..dFQ..":"..dPvPQ
+	local message = action..":"..version..":"..dNDWOTLK..":"..dNDRWOTLK..":"..dHDWOTLK..":"..dHDRWOTLK..":"..ddCQWOTLK..":"..dCQRWOTLK..":"..dFQWOTLK..":"..dFQRWOTLK..":"..dPvPQWOTLK..":"..dPvPQRWOTLK..":"..dNDTBC..":"..dNDRTBC..":"..dHDTBC..":"..dHDRTBC..":"..dCQTBC..":"..dCQRTBC..":"..dFQTBC..":"..dFQRTBC..":"..dPvPQTBC..":"..dPvPQRTBC
+	local msgQuests = dNDWOTLK..":"..dHDWOTLK..":"..dCQWOTLK..":"..dFQWOTLK..":"..dPvPQWOTLK..":"..dNDTBC..":"..dHDTBC..":"..dCQTBC..":"..dFQTBC..":"..dPvPQTBC
 	
 	--debug( "Channel:",ignore, "I have missing data:", missingData, "User requires reponse:", responseNeeded )
 	if ignore or responseNeeded or missingData then
@@ -521,16 +548,21 @@ function Reputable:sendAddonMessage( all, channel, ignore, responseNeeded )
 end
 
 local addonMsgArray = {
-	{ name = "dailyNormalDungeon" },
-	{ name = "dailyHeroicDungeon" },
-	{ name = "dailyCookingQuest" },
-	{ name = "dailyFishingQuest" },
-	{ name = "dailyPvPQuest" },
+	{ name = "dailyNormalWOTLKDungeon" },
+	{ name = "dailyHeroicWOTLKDungeon" },
+	{ name = "dailyCookingWOTLKQuest" },
+	{ name = "dailyFishingWOTLKQuest" },
+	{ name = "dailyPvPWOTLKQuest" },
+	{ name = "dailyNormalTBCDungeon" },
+	{ name = "dailyHeroicTBCDungeon" },
+	{ name = "dailyCookingTBCQuest" },
+	{ name = "dailyFishingTBCQuest" },
+	{ name = "dailyPvPTBCQuest" },
 }
 Reputable.needOldVersionMessage = true
 function Reputable:addonMessage( message, channel )
 	if not Reputable.addonMessagePrefixRegistered then return end 
-	Reputable:resetDailies(false) -- Checks if dailies need to be reset
+	--resetDailies(false) -- Checks if dailies need to be reset
 	
 	local nextChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset
 	if nextChange > 86400 then nextChange = nextChange - 86400 end
@@ -861,23 +893,37 @@ Reputable:SetScript("OnEvent", function (self, event, ...)
 			if guid then
 			--	debug( GetGossipAvailableQuests() )
 				local _, _, _, _, _, npcID, _ = strsplit("-",guid);
-				if npcID == "24370" or npcID == "24369" or npcID == "24393" or npcID == "15351" or npcID == "15350" then
+				if npcID == "24370" or npcID == "24369" or npcID == "24393" or npcID == "15351" or npcID == "15350" or npcID == "20735" or npcID == "31439" then
 					local questName = GetGossipAvailableQuests()
 					if Reputable.dailyInfoNames[ questName ] then
 						local resetTime = GetQuestResetTime()
 						local questID = Reputable.dailyInfoNames[ questName ]
 						
+						-- TBC
 						if Reputable.dailyInfo[ questID ].heroic then
-							Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeon = questID
-							Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeonReset = resetTime
+							Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeon = questID
+							Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeonReset = resetTime
 							Reputable:addonMessage()
 						elseif Reputable.dailyInfo[ questID ].normal then
-							Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeon = questID
-							Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeonReset = resetTime
+							Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeon = questID
+							Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeonReset = resetTime
 							Reputable:addonMessage()
 						elseif Reputable.dailyInfo[ questID ].pvp then
-							Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuest = questID
-							Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuestReset = resetTime
+							Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyPvPTBCQuest = questID
+							Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyPvPTBCQuestReset = resetTime
+							Reputable:addonMessage()
+						-- WOTLK
+						elseif Reputable.dailyInfo[ questID ].heroic then
+							Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyHeroicWOTLKDungeon = questID
+							Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyHeroicWOTLKDungeonReset = resetTime
+							Reputable:addonMessage()
+						elseif Reputable.dailyInfo[ questID ].normal then
+							Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyNormalWOTLKDungeon = questID
+							Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyNormalWOTLKDungeonReset = resetTime
+							Reputable:addonMessage()
+						elseif Reputable.dailyInfo[ questID ].pvp then
+							Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyPvPWOTLKQuest = questID
+							Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyPvPWOTLKQuestReset = resetTime
 							Reputable:addonMessage()
 						end
 					--	debug( questID, questName )
@@ -891,12 +937,20 @@ Reputable:SetScript("OnEvent", function (self, event, ...)
 			if questID and Reputable.dailyInfo[ questID ] then
 				local resetTime = GetQuestResetTime()
 				if Reputable.dailyInfo[ questID ].cooking then
-					Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuest = questID
-					Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuestReset = resetTime
+					Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuest = questID
+					Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuestReset = resetTime
 					Reputable:addonMessage()
 				elseif Reputable.dailyInfo[ questID ].fishing then
-					Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuest = questID
-					Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuestReset = resetTime
+					Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuest = questID
+					Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuestReset = resetTime
+					Reputable:addonMessage()
+				elseif Reputable.dailyInfo[ questID ].cooking then
+					Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyCookingWOTLKQuest = questID
+					Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyCookingWOTLKQuestReset = resetTime
+					Reputable:addonMessage()
+				elseif Reputable.dailyInfo[ questID ].fishing then
+					Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuest = questID
+					Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuestReset = resetTime
 					Reputable:addonMessage()
 				end
 				Reputable:guiUpdate( true )
@@ -990,11 +1044,16 @@ function Reputable:initiate()
 			guiShowCompletedQuests = true,
 			guiShowExaltedDailies = true,
 			guiUseLocalTime = true,
-			guiShowNormalDaily = true,
-			guiShowHeroicDaily = true,
-			guiShowCookingDaily = true,
-			guiShowFishingDaily = true,
-			guiShowPvPDaily = true,
+			guiShowNormalTBCDaily = true,
+			guiShowHeroicTBCDaily = true,
+			guiShowCookingTBCDaily = true,
+			guiShowFishingTBCDaily = true,
+			guiShowPvPTBCDaily = true,
+			guiShowNormalWOTLKDaily = true,
+			guiShowHeroicWOTLKDaily = true,
+			guiShowCookingWOTLKDaily = true,
+			guiShowFishingWOTLKDaily = true,
+			guiShowPvPWOTLKDaily = true,
 			repInQuestLog = true,
 			xpToolTip = true,
 			debug = false,
@@ -1028,11 +1087,14 @@ function Reputable:initiate()
 												faction	= playerFaction,
 											}
 		
-		if Reputable_Data.global.dailyDungeons == nil then Reputable_Data.global.dailyDungeons = {} end
-		if Reputable_Data.global.dailyDungeons[ Reputable.server ] == nil then Reputable_Data.global.dailyDungeons[ Reputable.server ] = {} end
+		if Reputable_Data.global.dailyTBCDungeons == nil then Reputable_Data.global.dailyTBCDungeons = {} end
+		if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ] == nil then Reputable_Data.global.dailyTBCDungeons[ Reputable.server ] = {} end
 		if Reputable_Data[Reputable.profileKey].instances == nil then Reputable_Data[Reputable.profileKey].instances = { heroicKeys = {} } end
 		if Reputable_Data[Reputable.profileKey].quests == nil then Reputable_Data[Reputable.profileKey].quests = {} end
-		if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset == nil then Reputable:setDailyOffest() end
+		if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyChangeOffset == nil then Reputable:setDailyOffest() end
+		if Reputable_Data.global.dailyWOTLKDungeons == nil then Reputable_Data.global.dailyWOTLKDungeons = {} end
+		if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ] == nil then Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ] = {} end
+		if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyChangeOffset == nil then Reputable:setDailyOffest() end
 		--if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset == nil then Reputable:setDailyOffest() end
 		--C_Timer.After(5, function() Reputable:UpdateData() end ) -- Delays data grab on login (in seconds). Unnecessary?
 		Reputable:getAllFactions( true )
@@ -1085,7 +1147,7 @@ function Reputable:initiate()
 			end
 		end
 		
-		Reputable:resetDailies( true )
+		--Reputable:resetDailies( true )
 		
 		
 		local lastLogInMonth = tonumber(date("%m%y", time()))
@@ -1131,19 +1193,32 @@ function Reputable:resetDailies( check )
 	--Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset
 	if time() > savedChangeTime then
 		debug("Dailies have changed")
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeon = nil
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeon = nil
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuest = nil
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuest = nil
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuest = nil
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeonReset = 90000
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeonReset = 90000
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuestReset = 90000
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuestReset = 90000
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuestReset = 90000
+		-- TBC
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeon = nil
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeon = nil
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuest = nil
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuest = nil
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyPvPTBCQuest = nil
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeonReset = 90000
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeonReset = 90000
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuestReset = 90000
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuestReset = 90000
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyPvPTBCQuestReset = 90000
+		-- WOTLK
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyNormalWOTLKDungeon = nil
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyHeroicWOTLKDungeon = nil
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyCookingWOTLKQuest = nil
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuest = nil
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyPvPWOTLKQuest = nil
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyNormalWOTLKDungeonReset = 90000
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyHeroicWOTLKDungeonReset = 90000
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyCookingWOTLKQuestReset = 90000
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuestReset = 90000
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyPvPWOTLKQuestReset = 90000
 		local nextChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset
 		if nextChange > 86400 then nextChange = nextChange - 86400 end
-		Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeTime = time() + nextChange
+		Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyChangeTime = time() + nextChange
+		Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyChangeTime = time() + nextChange
 		Reputable:guiUpdate()
 	end
 	if time() > savedResetTime then
@@ -1639,9 +1714,10 @@ end
 Reputable.addDailiesToToolTip = function ( tt )
 	if Reputable_Data.global.mmTooltipShowAvailableDailies then
 		local lineAdded = false
-		if Reputable_Data.global.guiShowNormalDaily and Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeon then
+		-- TBC
+		if Reputable_Data.global.guiShowNormalTBCDaily and Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeon then
 			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeon, nil, nil )
-			local dungeonID = Reputable.dailyInfo[ Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyNormalDungeon ].instanceID
+			local dungeonID = Reputable.dailyInfo[ Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyNormalTBCDungeon ].instanceID
 			local levelLock = '' local accessKeyLock = '' local heroicKeyLock = '' local accessQuestLock = '' local allLocks = ''
 			local colour, levelTooLow, levelString, requiredQuestComplete, accessKeyMissing, heroicKeyMissing = Reputable:getInstanceInfo( dungeonID, false, nil )
 			if accessKeyMissing then accessKeyLock = Reputable:icons( 'lock' ) end
@@ -1650,9 +1726,9 @@ Reputable.addDailiesToToolTip = function ( tt )
 			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..LFG_TYPE_DAILY_DUNGEON.."|r", Reputable:createLink( "instance" , dungeonID, false, nil, nil, nil )..allLocks )
 			lineAdded = true
 		end
-		if Reputable_Data.global.guiShowHeroicDaily and Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeon then
+		if Reputable_Data.global.guiShowHeroicTBCDaily and Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicTBCDungeon then
 			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeon, nil, nil )
-			local dungeonID = Reputable.dailyInfo[ Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyHeroicDungeon ].instanceID
+			local dungeonID = Reputable.dailyInfo[ Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyHeroicDungeon ].instanceID
 			local levelLock = '' local accessKeyLock = '' local heroicKeyLock = '' local accessQuestLock = '' local allLocks = ''
 			local colour, levelTooLow, levelString, requiredQuestComplete, accessKeyMissing, heroicKeyMissing = Reputable:getInstanceInfo( dungeonID, true, nil )
 			if heroicKeyMissing then heroicKeyLock = Reputable:icons( 'lock' ) end
@@ -1663,20 +1739,62 @@ Reputable.addDailiesToToolTip = function ( tt )
 			lineAdded = true
 		end
 		
-		if Reputable_Data.global.guiShowCookingDaily and Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuest then
-			local questID = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyCookingQuest
+		if Reputable_Data.global.guiShowCookingTBCDaily and Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuest then
+			local questID = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyCookingTBCQuest
 			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( questID, nil, nil )
 			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..PROFESSIONS_COOKING.." "..DAILY.."|r", Reputable:createLink( "quest" , questID, nil, nil, nil, nil ) )
 			lineAdded = true
 		end
-		if Reputable_Data.global.guiShowFishingDaily and Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuest then
-			local questID = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyFishingQuest
+		if Reputable_Data.global.guiShowFishingTBCDaily and Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuest then
+			local questID = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyFishingTBCQuest
 			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( questID, nil, nil )
 			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..PROFESSIONS_FISHING.." "..DAILY.."|r", Reputable:createLink( "quest" , questID, nil, nil, nil, nil ) )
 			lineAdded = true
 		end
-		if Reputable_Data.global.guiShowPvPDaily and Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuest then
-			local questID = Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyPvPQuest
+		if Reputable_Data.global.guiShowPvPTBCDaily and Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyPvPTBCQuest then
+			local questID = Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyPvPTBCQuest
+			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( questID, nil, nil )
+			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..PVP.." "..DAILY.."|r", Reputable:createLink( "quest" , questID, nil, nil, nil, nil ) )
+			lineAdded = true
+		end
+		-- WOTLK
+		if Reputable_Data.global.guiShowNormalWOTLKDaily and Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyNormalWOTLKDungeon then
+			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyNormalWOTLKDungeon, nil, nil )
+			local dungeonID = Reputable.dailyInfo[ Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyNormalWOTLKDungeon ].instanceID
+			local levelLock = '' local accessKeyLock = '' local heroicKeyLock = '' local accessQuestLock = '' local allLocks = ''
+			local colour, levelTooLow, levelString, requiredQuestComplete, accessKeyMissing, heroicKeyMissing = Reputable:getInstanceInfo( dungeonID, false, nil )
+			if accessKeyMissing then accessKeyLock = Reputable:icons( 'lock' ) end
+			if requiredQuestComplete == false then accessQuestLock = Reputable:icons( 'lock' ) end
+			allLocks = " "..levelLock .. accessKeyLock .. accessQuestLock
+			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..LFG_TYPE_DAILY_DUNGEON.."|r", Reputable:createLink( "instance" , dungeonID, false, nil, nil, nil )..allLocks )
+			lineAdded = true
+		end
+		if Reputable_Data.global.guiShowHeroicWOTLKDaily and Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyHeroicWOTLKDungeon then
+			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyHeroicWOTLKDungeon, nil, nil )
+			local dungeonID = Reputable.dailyInfo[ Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyHeroicWOTLKDungeon ].instanceID
+			local levelLock = '' local accessKeyLock = '' local heroicKeyLock = '' local accessQuestLock = '' local allLocks = ''
+			local colour, levelTooLow, levelString, requiredQuestComplete, accessKeyMissing, heroicKeyMissing = Reputable:getInstanceInfo( dungeonID, true, nil )
+			if heroicKeyMissing then heroicKeyLock = Reputable:icons( 'lock' ) end
+			if accessKeyMissing then accessKeyLock = Reputable:icons( 'lock' ) end
+			if requiredQuestComplete == false then accessQuestLock = Reputable:icons( 'lock' ) end
+			allLocks = " "..levelLock .. heroicKeyLock .. accessKeyLock .. accessQuestLock
+			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..LFG_TYPE_DAILY_HEROIC_DUNGEON.."|r", Reputable:createLink( "instance" , dungeonID, true, nil, nil, nil )..allLocks )
+			lineAdded = true
+		end
+		if Reputable_Data.global.guiShowCookingWOTLKDaily and Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyCookingWOTLKQuest then
+			local questID = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyCookingWOTLKQuest
+			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( questID, nil, nil )
+			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..PROFESSIONS_COOKING.." "..DAILY.."|r", Reputable:createLink( "quest" , questID, nil, nil, nil, nil ) )
+			lineAdded = true
+		end
+		if Reputable_Data.global.guiShowFishingWOTLKDaily and Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuest then
+			local questID = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyFishingWOTLKQuest
+			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( questID, nil, nil )
+			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..PROFESSIONS_FISHING.." "..DAILY.."|r", Reputable:createLink( "quest" , questID, nil, nil, nil, nil ) )
+			lineAdded = true
+		end
+		if Reputable_Data.global.guiShowPvPWOTLKDaily and Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyPvPWOTLKQuest then
+			local questID = Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyPvPWOTLKQuest
 			local levelColor, complete, inProgress, progressIcon, levelMin, levelTooLow, levelString, minF, minR, maxF, maxR, repTooLow, repTooHigh, requiredQuestComplete = Reputable:getQuestInfo( questID, nil, nil )
 			tt:AddDoubleLine( Reputable:icons( complete ).."|cffffff00"..PVP.." "..DAILY.."|r", Reputable:createLink( "quest" , questID, nil, nil, nil, nil ) )
 			lineAdded = true
@@ -2039,8 +2157,13 @@ function Reputable:updateResetTime()
 		_G[tt.."TextRight"..tooltip.timerLine]:SetText( RESET..": "..SecondsToTime(GetQuestResetTime()) )
 	--	_G[tt.."TextRight"..tooltip.timerLine]:SetText( RESET..": "..GetQuestResetTime() )
 		
-		if Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset ~= 0 then
-			local nextChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyDungeons[ Reputable.server ].dailyChangeOffset
+		if Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyChangeOffset ~= 0 then
+			local nextChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyTBCDungeons[ Reputable.server ].dailyChangeOffset
+			if nextChange > 86400 then nextChange = nextChange - 86400 end
+			_G[tt.."TextRight"..tooltip.timerLine+1]:SetText( AVAILABLE.." "..DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON..": "..SecondsToTime( nextChange ) )
+		end
+		if Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyChangeOffset ~= 0 then
+			local nextChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyWOTLKDungeons[ Reputable.server ].dailyChangeOffset
 			if nextChange > 86400 then nextChange = nextChange - 86400 end
 			_G[tt.."TextRight"..tooltip.timerLine+1]:SetText( AVAILABLE.." "..DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON..": "..SecondsToTime( nextChange ) )
 		end

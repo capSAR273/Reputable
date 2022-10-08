@@ -6,6 +6,15 @@ local zgcoin = { faction = 270, rep = 25, reward = {19858}, level = 58, stack = 
 local adwrit = { faction = 529, rep = 150, reward = {22523,22524} }
 
 Reputable.repitems = {
+
+-- [[WOTLK]]
+	[ 44581 ] = { faction = 1091, rep = 500, quest = 13372, reward = { }},		-- Key to the Focusing Iris (Normal, 10 man Naxx)
+	[ 44582 ] = { faction = 1091, rep = 500, quest = 13375, reward = { }},		-- Heroic Key to the Focusing Iris (Normal, 25 man Naxx)
+
+-- Sons of Hodir
+	[ 13559 ] = { faction = 1119, rep = 500, quest = 13559, level = 77, min = 0, stack = 10 }, 										-- Relic of Ulduar
+
+
 --[[ TBC ]] --
 	[32386] = { faction = 947,  rep = 1000,  quest = 11003, reward = { 28792,28793,28790,28791 }, Alliance = 32385 },				-- Magtheridon's Head (Horde)
 	[32385] = { faction = 946,  rep = 1000,  quest = 11002, reward = { 28792,28793,28790,28791 }, Horde = 32386 },					-- Magtheridon's Head (Alliance)
@@ -322,6 +331,28 @@ Reputable.instance = {
 }
 
 Reputable.factionInfo = {
+
+	--WOTLK Factions
+	[ 1037 ] = { name = "Alliance Vanguard", Horde = false, },
+	[ 1050 ] = { name = "Valiance Expedition", Horde = false, },
+	[ 1052 ] = { name = "Horde Expedition"},
+	[ 1064 ] = { name = "The Taunka", Alliance = false},
+	[ 1067 ] = { name = "The Hand of Vengeance", Alliance = false},
+	[ 1068 ] = { name = "Explorer's League", Horde = false},
+	[ 1073 ] = { name = "Kalu'ak"},
+	[ 1085 ] = { name = "Warsong Offensive", Alliance = false},
+	[ 1090 ] = { name = "Kirin Tor"},
+	[ 1091 ] = { name = "Wyrmwrest Accord"},
+	[ 1094 ] = { name = "The Silver Covenant", Horde = false},
+	[ 1098 ] = { name = "Knights of Ebon Blade"},
+	[ 1104 ] = { name = "The Frenzyheart"},
+	[ 1105 ] = { name = "The Oracles"},
+	[ 1106 ] = { name = "Argent Crusade"},
+	[ 1119 ] = { name = "Sons of Hodir"},
+	[ 1124 ] = { name = "The Sunreavers", Alliance = false},
+	[ 1126 ] = { name = "The Frostborn", Horde = false},
+
+	--TBC Factions
 	[  946 ] = { name = "Honor Hold", iz = 1, Horde = false, rquests = { 10106 } },
 	[  947 ] = { name = "Thrallmar", iz = 1, Alliance = false, rquests = { 10110 } },
 	[  942 ] = { name = "Cenarion Expedition", iz = 2, rquests = { 9784, 9875, 9766 } },
@@ -403,6 +434,8 @@ Reputable.factionByMapID = {
 	[1949] = 942,								-- Blades Edge Mountains
 	[1953] = 933,								-- Netherstorm
 	[1948] = 1012,								-- Shadowmoon Valley
+	-- WOTLK Zones
+
 }
 
 Reputable.extraQuestInfo = {
@@ -495,50 +528,50 @@ Reputable.questByFaction = {
 	[  932 ] = {"Shattrath City",{10210,10211,10551,10554},{10020,10021},{11038},{10017,10019},{10325,10327,10326},{10653,10655,10654},{10420,10421},
 	"Shadowmoon Valley",{10568,10571,10574,10575},{10619,10816},{10587,10637,10640},{10650,10651},"Netherstorm",{10241,10313,10246},{10243,10245,10299,10321,10322,10323},{10328,10431,10380,10381,10407,10410,10409}},
 	[ 1031 ] = {
-"Shattrath City",{11096,11098},
-"Terokkar Forest",{11093,11008,11085},{11004,11006,11005,11021,11024,11028,11056,11029,11885,11074,11073},
-"Blade's Edge Mountains",{11062,11010,11023},{11119},{11065,11066},{11078},
-"With Ogri'la",{11059,11026,11058},
-},
+		"Shattrath City",{11096,11098},
+		"Terokkar Forest",{11093,11008,11085},{11004,11006,11005,11021,11024,11028,11056,11029,11885,11074,11073},
+		"Blade's Edge Mountains",{11062,11010,11023},{11119},{11065,11066},{11078},
+		"With Ogri'la",{11059,11026,11058},
+	},
 	[ 1038 ] = {
-UNLOCK.." "..REPUTATION,
-{10984,10983,10995,10996,10997,10998,11000},
-"Blade's Edge Mountains",
-{11022,11009,11025,11058,11080},
-{11030,11061,11079},
-{11059},
+		UNLOCK.." "..REPUTATION,
+		{10984,10983,10995,10996,10997,10998,11000},
+		"Blade's Edge Mountains",
+		{11022,11009,11025,11058,11080},
+		{11030,11061,11079},
+		{11059},
+		
+		{11010,11023},
+		{11065,11066},
 
-{11010,11023},
-{11065,11066},
+		{11091},
 
-{11091},
+		{11026},
+		{11060},
+		{11051},
 
-{11026},
-{11060},
-{11051},
-
-{11027},
-},
+		{11027},
+	},
 	[ 1015 ] = {
-UNLOCK.." "..REPUTATION,
-{10804,10811,10814,10836,10837,10854,10858,10866,10870},
-"Shadowmoon Valley",
-{11012,11013,11014},
-{11041},
-{11019},
+		UNLOCK.." "..REPUTATION,
+		{10804,10811,10814,10836,10837,10854,10858,10866,10870},
+		"Shadowmoon Valley",
+		{11012,11013,11014},
+		{11041},
+		{11019},
 
-{11049},
+		{11049},
 
-{11053,11075,11083,11081,11082,11054},
+		{11053,11075,11083,11081,11082,11054},
 
-{11084,11089,11090},
+		{11084,11089,11090},
 
-{11099,11094,11100,11095},
+		{11099,11094,11100,11095},
 
-{11107,11108},
-"Race",
-{11063,11064,11067,11068,11069,11070,11071},
-},
+		{11107,11108},
+		"Race",
+		{11063,11064,11067,11068,11069,11070,11071},
+	},
 	[ 1077 ] = {"Magisters' Terrace",{11481,11488,11490,11492},"Isle of Quel'Danas",{11526,11550,11517}},
 
 --{11102},-- druid version of "Bombing run" -- need to impliment
@@ -841,7 +874,7 @@ Reputable.attunements = {
 			"• Kill Nightbane and loot |cffffffff|Hitem:31751|h[Blazing Signet]|h|r",
 			"i1547","• Return to Skar'this the Heretic"},
 		}
-	},
+	}
 }
 
 Reputable.interchangableQuests = {
@@ -902,17 +935,60 @@ Reputable.dailyInfo = {
 	[11374] = { instanceID = 558, heroic = true, rep = {933,350,1011,350 } },
 	[11373] = { instanceID = 557, heroic = true, rep = {933,500 } },
 	[11375] = { instanceID = 555, heroic = true, rep = {933,350,1011,350 } },
-	-- Cooking Dailies
+	-- WOTLK Normal Dungeon Dailies
+	[13240] = { instanceID = 4277, normal = true, rep = 1090}, -- Timear Foresees Centrifuge Constructs in your Future!
+	[13243] = { instanceID = 4100, normal = true, rep = 1090}, -- Timear Foresees Infinite Agents in your Future!
+	[13244] = { instanceID = 4272, normal = true, rep = 1090}, -- Timear Foresees Titanium Vanguards in your Future!
+	[13241] = { instanceID = 1196, normal = true, rep = 1090}, -- Timear Foresees Ymirjar Berserkers in your Future!
+	-- WOTLK Heroic Dungeon Dailies
+	[13254] = { instanceID = 4277, heroic = true, rep = 1090}, -- Proof of Demise: Anub'arak
+	[13256] = { instanceID = 4415, heroic = true, rep = 1090}, -- Proof of Demise: Cyanigosa
+	[13250] = { instanceID = 4416, heroic = true, rep = 1090}, -- Proof of Demise: Gal'darah
+	[13255] = { instanceID = 4494, heroic = true, rep = 1090}, -- Proof of Demise: Herald Volazj
+	[13245] = { instanceID = 206, heroic = true, rep = 1090}, -- Proof of Demise: Ingvar the Plunderer
+	[13246] = { instanceID = 4265, heroic = true, rep = 1090}, -- Proof of Demise: Keristrasza
+	[13248] = { instanceID = 1196, heroic = true, rep = 1090}, -- Proof of Demise: King Ymiron
+	[13247] = { instanceID = 4228, heroic = true, rep = 1090}, -- Proof of Demise: Ley-Guardian Eregos
+	[13253] = { instanceID = 4272, heroic = true, rep = 1090}, -- Proof of Demise: Loken
+	[13251] = { instanceID = 4100, heroic = true, rep = 1090}, -- Proof of Demise: Mal'Ganis
+	[13252] = { instanceID = 4264, heroic = true, rep = 1090}, -- Proof of Demise: Sjonnir The Ironshaper
+	[13249] = { instanceID = 4196, heroic = true, rep = 1090}, -- Proof of Demise: The Prophet Tharon'ja
+	-- WOTLK Raid Dailies (added in future patch, TOCR?)
+	[24580] = { instanceID = 3456, raid = true, rep = 1090}, -- Anub'Rekhan Must Die!
+	[24585] = { instanceID = 4273, raid = true, rep = 1090}, -- Flame Leviathan Must Die!
+	[24587] = { instanceID = 4273, raid = true, rep = 1090}, -- Ignis the Furnace Master Must Die!
+	[24582] = { instanceID = 3456, raid = true, rep = 1090}, -- Instructor Razuvious Must Die!
+	[24589] = { instanceID = 4722, raid = true, rep = 1090}, -- Lord Jaraxxus Must Die!
+	[24590] = { instanceID = 4722, raid = true, rep = 1090}, -- Lord Marrowgar Must Die!
+	[24584] = { instanceID = 4500, raid = true, rep = 1090}, -- Malygos Must Die!
+	[24581] = { instanceID = 3456, raid = true, rep = 1090}, -- Noth the Plaguebringer Must Die!
+	[24583] = { instanceID = 3456, raid = true, rep = 1090}, -- Patchwerk Must Die!
+	[24586] = { instanceID = 4273, raid = true, rep = 1090}, -- Razorscale Must Die!
+	[24579] = { instanceID = 4493, raid = true, rep = 1090}, -- Sartharion Must Die!
+	[24588] = { instanceID = 4273, raid = true, rep = 1090}, -- XT-002 Deconstructor Must Die!
+	-- TBC Cooking Dailies
 	[11380] = { cooking = true },
 	[11377] = { cooking = true },
 	[11381] = { cooking = true },
 	[11379] = { cooking = true },
-	-- Fishing Dailies
+	-- WOTLK Cooking Dailies
+	[13102] = { cooking = true, Horde = 13114},	-- Sewer Stew
+	[13103] = { cooking = true, Horde = 13115},	-- Cheese for Glowergold
+	[13107] = { cooking = true, Horde = 13116},	-- Mustard Dogs!	
+	[13100] = { cooking = true, Horde = 13112},	-- Infused Mushroom Meatloaf
+	[13101] = { cooking = true, Horde = 13113}, -- Convention at the Legerdemain
+	-- TBC Fishing Dailies
 	[11665] = { fishing = true },
 	[11669] = { fishing = true },
 	[11668] = { fishing = true },
 	[11666] = { fishing = true },
 	[11667] = { fishing = true },
+	-- WOTLK Fishing Dailies
+	[13833] = { fishing = true }, -- Blood is Thicker
+	[13834] = { fishing = true }, -- Dangerously Delicious
+	[13836] = { fishing = true }, -- Disarmed!
+	[13832] = { fishing = true }, -- Jewel of the Sewers
+	[13830] = { fishing = true }, -- The Ghostfish
 	-- PvP Dailies
 	[11335] = { pvp = true, Horde    = 11339 },	-- AB
 	[11339] = { pvp = true, Alliance = 11335 },	-- AB

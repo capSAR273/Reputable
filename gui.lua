@@ -126,17 +126,50 @@ end
 Reputable.guiCats = {
 	[ 1 ] = { name = "events", label = BATTLE_PET_SOURCE_7 },
 	[ 2 ] = { name = "dungeons", label = DUNGEONS },
-	[ 3 ] = { name = "reputations", label = REPUTATION },
-	[ 4 ] = { name = "attunements", label = "Attunements" },
+	[ 3 ] = { name = "reputations", label = EXPANSION_NAME2.. " "..REPUTATION },
+	[ 4 ] = { name = "attunements", label = EXPANSION_NAME1.." Attunements" },
 	[ 5 ] = { name = "reputationsC", label = EXPANSION_NAME0.." "..REPUTATION },
 	[ 6 ] = { name = "reputationsUnsorted", label = EXPANSION_NAME0.." (Unsorted)" },
 	[ 7 ] = { name = "attunementsC", label = EXPANSION_NAME0.." Attunements" },
+	[ 8 ] = { name = "reputationsTBCUnsorted", label = EXPANSION_NAME1.." (Unsorted)"}
 }
 Reputable.guiTabs = {
 	{ name = "midsummer",	title = "Midsummer Fire Festival",	label = "Midsummer Fire Festival", cat = 1 },
 	{ name = "brewfest",	title = "Brewfest",	label = "Brewfest", cat = 1 },
 	{ name = "dungeons",	title = EXPANSION_NAME1 .. " " .. DUNGEONS, 	label = EXPANSION_NAME1, cat = 2 },
 	{ name = "dailies", 	title = ALL.." "..DAILY.." "..QUESTS_LABEL, label = ALL.." "..DAILY.." "..QUESTS_LABEL, cat = 3 },
+	{ faction =  1037 }, -- Alliance Vanguard
+	{ faction =  1050 }, -- Valiance Expedition
+	{ faction =  1052 }, -- Horde Expedition
+	{ faction =  1064 }, -- The Taunka
+	{ faction =  1067 }, -- The Hand of Vengeance
+	{ faction =  1068 }, -- Explorer's League
+	{ faction =  1073 }, -- Kalu'ak
+	{ faction =  1085 }, -- Warsong Offensive
+	{ faction =  1090 }, -- Kirin Tor
+	{ faction =  1091 }, -- Wyrmwrest Accord
+	{ faction =  1094 }, -- The Silver Covenant
+	{ faction =  1098 }, -- Knights of Ebon Blade
+	{ faction =  1104 }, -- The Frenzyheart
+	{ faction =  1105 }, -- The Oracles
+	{ faction =  1106 }, -- Argent Crusade
+	{ faction =  1119 }, -- Sons of Hodir
+	{ faction =  1124 }, -- The Sunreavers
+	{ faction =  1126 }, -- The Frostborn
+	{ instance = 532 },
+	{ instance = "Nightbane" },
+	{ instance = 555 },
+	{ instance = 552 },
+	{ instance = 269 },
+	{ instance = 540 },
+	{ instance = 550 },
+	{ instance = 548 }
+	--{ instance = 249, cat = 6 }, -- testing (ony)
+	--{ faction =  529 }, -- testing argentdawn
+	--{ faction =  69, cat = 6 }, -- testing darnassus
+}
+
+local tbcFactionList = {
 	{ faction =  946 },
 	{ faction =  947 },
 	{ faction =  942 },
@@ -154,19 +187,9 @@ Reputable.guiTabs = {
 	{ faction = 1031 },
 	{ faction = 1038 },
 	{ faction = 1015 },
-	{ faction = 1077 },
-	{ instance = 532 },
-	{ instance = "Nightbane" },
-	{ instance = 555 },
-	{ instance = 552 },
-	{ instance = 269 },
-	{ instance = 540 },
-	{ instance = 550 },
-	{ instance = 548 },
-	--{ instance = 249, cat = 6 }, -- testing (ony)
-	--{ faction =  529 }, -- testing argentdawn
-	--{ faction =  69, cat = 6 }, -- testing darnassus
+	{ faction = 1077 }
 }
+
 local classicFactionList = {
 	{ faction = 529	},	-- Arengt Dawn
 --	{ faction = 87	},	-- Bloodsail Buccaneers
@@ -201,6 +224,12 @@ local classicFactionList = {
 --	{ faction = 589	},	-- Wintersaber Trainers
 	{ faction = 270	},	-- Zandalar Tribe
 }
+local tbcFactionPages = {}
+for _,f in ipairs( tbcFactionList ) do
+	tbcFactionPages[ f.faction ] = true
+	table.insert(Reputable.guiTabs, {faction = f.faction, cat = 8} )
+end
+
 local classicFactionPages = {}
 for _,f in ipairs( classicFactionList ) do
 	--print( k,v, classicFactionList[ k ].faction )
@@ -208,6 +237,7 @@ for _,f in ipairs( classicFactionList ) do
 	classicFactionPages[ f.faction ] = true
 	table.insert(Reputable.guiTabs, {faction = f.faction, cat = 6} )
 end
+
 local classicAttunePages = { [249]=true }
 for instanceID in pairs( classicAttunePages ) do
 	table.insert(Reputable.guiTabs, {instance = instanceID, cat = 7} )
@@ -397,8 +427,12 @@ local function makeDataForAllPages()
 	end
 	
 	Reputable.guiTabs[ "dailies" ].html.right[ 1 ] = DAILY.." "..RESET.." "..date(TIMESTAMP_FORMAT_HHMM_AMPM, timestamp )
-	if Reputable_Data.global.dailyDungeons[ server ].dailyChangeOffset ~= 0 then
-		Reputable.guiTabs[ "dailies" ].html.right[ 2 ] = DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON.." "..date(TIMESTAMP_FORMAT_HHMM_AMPM, timestamp + 3600 * Reputable_Data.global.dailyDungeons[ server ].dailyChangeOffset )
+	if Reputable_Data.global.dailyTBCDungeons[ server ].dailyChangeOffset ~= 0 then
+		Reputable.guiTabs[ "dailies" ].html.right[ 2 ] = DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON.." "..date(TIMESTAMP_FORMAT_HHMM_AMPM, timestamp + 3600 * Reputable_Data.global.dailyTBCDungeons[ server ].dailyChangeOffset )
+	end
+	Reputable.guiTabs[ "dailies" ].html.right[ 1 ] = DAILY.." "..RESET.." "..date(TIMESTAMP_FORMAT_HHMM_AMPM, timestamp )
+	if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyChangeOffset ~= 0 then
+		Reputable.guiTabs[ "dailies" ].html.right[ 2 ] = DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON.." "..date(TIMESTAMP_FORMAT_HHMM_AMPM, timestamp + 3600 * Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyChangeOffset )
 	end
 	
 	addPlayerToDailiesPage( Reputable.profileKey, Reputable_Data.global.ttShowCurrentInList and Reputable_Data.global.profileKeys[ Reputable.profileKey ] )
@@ -416,53 +450,110 @@ local function makeDataForAllPages()
 	--	guiShowCookingDaily = true,
 	--	guiShowNormalDaily = true,
 	--	guiShowHeroicDaily = true,
-	
-	if Reputable_Data.global.guiShowNormalDaily then
+
+	-- WOTLK
+	if Reputable_Data.global.guiShowNormaWOTLKDaily then
 		addLineToHTML( dailiesPage, "p", "|cffffff00"..LFG_TYPE_DAILY_DUNGEON.."|r", nil, nil )
-		if Reputable_Data.global.dailyDungeons[ server ].dailyNormalDungeon then
-			addDungeonToHTML( dailiesPage, Reputable.dailyInfo[ Reputable_Data.global.dailyDungeons[ server ].dailyNormalDungeon ].instanceID, 0, nil, nil)
-			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyDungeons[ server ].dailyNormalDungeon, nil, nil )
+		if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyNormalWOTLKDungeon then
+			addDungeonToHTML( dailiesPage, Reputable.dailyInfo[ Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyNormalWOTLKDungeon ].instanceID, 0, nil, nil)
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyNormalWOTLKDungeon, nil, nil )
 		else
 			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with Nether-Stalker Mah'duun in Shattrath City ]|r", true, nil)
 		end
 		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
 	end
 	
-	if Reputable_Data.global.guiShowHeroicDaily then
+	if Reputable_Data.global.guiShowHeroicWOTLKDaily then
 		addLineToHTML( dailiesPage, "p", "|cffffff00"..LFG_TYPE_DAILY_HEROIC_DUNGEON.."|r", nil, nil )
-		if Reputable_Data.global.dailyDungeons[ server ].dailyHeroicDungeon then
-			addDungeonToHTML( dailiesPage, Reputable.dailyInfo[ Reputable_Data.global.dailyDungeons[ server ].dailyHeroicDungeon ].instanceID, 1, nil, nil)
-			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyDungeons[ server ].dailyHeroicDungeon, nil, nil )
+		if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyHeroicWOTLKDungeon then
+			addDungeonToHTML( dailiesPage, Reputable.dailyInfo[ Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyHeroicWOTLKDungeon ].instanceID, 1, nil, nil)
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyHeroicWOTLKDungeon, nil, nil )
 		else
 			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with Wind Trader Zhareem in Shattrath City ]|r", true, nil)
 		end
 		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
 	end
 	
-	if Reputable_Data.global.guiShowCookingDaily then
+	if Reputable_Data.global.guiShowCookingWOTLKDaily then
 		addLineToHTML( dailiesPage, "p", "|cffffff00"..PROFESSIONS_COOKING.." "..DAILY.."|r", nil, nil )
-		if Reputable_Data.global.dailyDungeons[ server ].dailyCookingQuest then
-			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyDungeons[ server ].dailyCookingQuest, nil, nil )
+		if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyCookingWOTLKQuest then
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyCookingWOTLKQuest, nil, nil )
 		else
 			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with The Rokk in Shattrath City ]|r", true, nil)
 		end
 		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
 	end
 	
-	if Reputable_Data.global.guiShowFishingDaily then
+	if Reputable_Data.global.guiShowFishingWOTLKDaily then
 		addLineToHTML( dailiesPage, "p", "|cffffff00"..PROFESSIONS_FISHING.." "..DAILY.."|r", nil, nil )
-		if Reputable_Data.global.dailyDungeons[ server ].dailyFishingQuest then
-			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyDungeons[ server ].dailyFishingQuest, nil, nil )
+		if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyFishingWOTLKQuest then
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyFishingWOTLKQuest, nil, nil )
 		else
 			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with Old Man Barlo in Terokkar Forest ]|r", true, nil)
 		end
 		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
 	end
 	
-	if Reputable_Data.global.guiShowPvPDaily then
+	if Reputable_Data.global.guiShowPvPWOTLKDaily then
 		addLineToHTML( dailiesPage, "p", "|cffffff00"..PVP.." "..DAILY.."|r", nil, nil )
-		if Reputable_Data.global.dailyDungeons[ server ].dailyPvPQuest then
-			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyDungeons[ server ].dailyPvPQuest, nil, nil )
+		if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyPvPWOTLKQuest then
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyPvPWOTLKQuest, nil, nil )
+		else
+			if playerFaction == 'Alliance' then
+				addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with an Alliance Brigadier General ]|r", true, nil)
+			else
+				addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with a Horde Warbringer ]|r", true, nil)
+			end
+		end
+		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
+	end
+	-- TBC
+	if Reputable_Data.global.guiShowNormaTBCDaily then
+		addLineToHTML( dailiesPage, "p", "|cffffff00"..LFG_TYPE_DAILY_DUNGEON.."|r", nil, nil )
+		if Reputable_Data.global.dailyTBCDungeons[ server ].dailyNormalTBCDungeon then
+			addDungeonToHTML( dailiesPage, Reputable.dailyInfo[ Reputable_Data.global.dailyTBCDungeons[ server ].dailyNormalTBCDungeon ].instanceID, 0, nil, nil)
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyTBCDungeons[ server ].dailyNormalTBCDungeon, nil, nil )
+		else
+			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with Nether-Stalker Mah'duun in Shattrath City ]|r", true, nil)
+		end
+		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
+	end
+	
+	if Reputable_Data.global.guiShowHeroicTBCDaily then
+		addLineToHTML( dailiesPage, "p", "|cffffff00"..LFG_TYPE_DAILY_HEROIC_DUNGEON.."|r", nil, nil )
+		if Reputable_Data.global.dailyTBCDungeons[ server ].dailyHeroicTBCDungeon then
+			addDungeonToHTML( dailiesPage, Reputable.dailyInfo[ Reputable_Data.global.dailyTBCDungeons[ server ].dailyHeroicTBCDungeon ].instanceID, 1, nil, nil)
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyTBCDungeons[ server ].dailyHeroicTBCDungeon, nil, nil )
+		else
+			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with Wind Trader Zhareem in Shattrath City ]|r", true, nil)
+		end
+		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
+	end
+	
+	if Reputable_Data.global.guiShowCookingTBCDaily then
+		addLineToHTML( dailiesPage, "p", "|cffffff00"..PROFESSIONS_COOKING.." "..DAILY.."|r", nil, nil )
+		if Reputable_Data.global.dailyTBCDungeons[ server ].dailyCookingTBCQuest then
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyTBCDungeons[ server ].dailyCookingTBCQuest, nil, nil )
+		else
+			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with The Rokk in Shattrath City ]|r", true, nil)
+		end
+		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
+	end
+	
+	if Reputable_Data.global.guiShowFishingTBCDaily then
+		addLineToHTML( dailiesPage, "p", "|cffffff00"..PROFESSIONS_FISHING.." "..DAILY.."|r", nil, nil )
+		if Reputable_Data.global.dailyTBCDungeons[ server ].dailyFishingTBCQuest then
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyTBCDungeons[ server ].dailyFishingTBCQuest, nil, nil )
+		else
+			addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with Old Man Barlo in Terokkar Forest ]|r", true, nil)
+		end
+		addLineToHTML( dailiesPage, "p", "<br/>", nil, nil )
+	end
+	
+	if Reputable_Data.global.guiShowPvPTBCDaily then
+		addLineToHTML( dailiesPage, "p", "|cffffff00"..PVP.." "..DAILY.."|r", nil, nil )
+		if Reputable_Data.global.dailyTBCDungeons[ server ].dailyPvPTBCQuest then
+			addQuestToHTML( dailiesPage, Reputable_Data.global.dailyTBCDungeons[ server ].dailyPvPTBCQuest, nil, nil )
 		else
 			if playerFaction == 'Alliance' then
 				addLineToHTML( dailiesPage, "p", "|cff808080[ "..UNKNOWN.." - Speak with an Alliance Brigadier General ]|r", true, nil)
@@ -583,7 +674,7 @@ local function makeDataForAllPages()
 			end
 		end
 	end
-	
+end
 	
 	for attunementID, data in pairs ( Reputable.attunements ) do
 		local pageName = "attune" .. attunementID
@@ -818,6 +909,8 @@ local function makeDataForAllPages()
 		if q[12] ~= 1 and q[6] > 0 then
 			if classicFactionPages[ q[5][1] ] then
 				addQuestToHTML( Reputable.guiTabs[ "faction"..q[5][1] ].html, questID, repIncrease, nil, true )
+			if tbcFactionPages[ q[5][1] ] then
+				addQuestToHTML( Reputable.guiTabs[ "faction"..q[5][1] ].html, questID, repIncrease, nil, true )
 			elseif q[5][1] == 67 then	-- Horde
 				addQuestToHTML( Reputable.guiTabs[ "faction911" ].html, questID, repIncrease, nil, true )
 				addQuestToHTML( Reputable.guiTabs[ "faction76"  ].html, questID, repIncrease, nil, true )
@@ -839,6 +932,13 @@ local function makeDataForAllPages()
 		end
 	end
 	for f in pairs( classicFactionPages ) do
+		if Reputable_Data[Reputable.profileKey].factions[f] and Reputable_Data[Reputable.profileKey].factions[f] >= 42000 then
+			Reputable.gui.menu[ "menuBTN_" .. "faction"..f ]:SetNormalFontObject( "GameFontGreenSmall" )
+		end
+		addLineToHTML( Reputable.guiTabs[ "faction"..f ].html, "p", "<br/>", nil, nil )
+		addLineToHTML( Reputable.guiTabs[ "faction"..f ].html, "p", "<br/>", nil, nil )
+	end
+	for f in pairs( tbcFactionPages ) do
 		if Reputable_Data[Reputable.profileKey].factions[f] and Reputable_Data[Reputable.profileKey].factions[f] >= 42000 then
 			Reputable.gui.menu[ "menuBTN_" .. "faction"..f ]:SetNormalFontObject( "GameFontGreenSmall" )
 		end
@@ -1048,7 +1148,7 @@ local function createGUI( page )
 end
 
 function Reputable:guiUpdate( skipLogCheck, needsRefresh )
-	Reputable:resetDailies(false)
+	--Reputable:resetDailies(false)
 	if not skipLogCheck then
 		Reputable:getQuestLog( needsRefresh )
 	else
@@ -1062,7 +1162,7 @@ function Reputable:guiUpdate( skipLogCheck, needsRefresh )
 end
 
 function Reputable:toggleGUI( show, page )
-	Reputable:resetDailies(false)
+	--Reputable:resetDailies(false)
 	if Reputable.gui == nil then
 		createGUI( page )
 	elseif Reputable.gui:IsVisible() and not show then
@@ -1104,17 +1204,27 @@ local function minimapButtonClick( button )
 	if button=="LeftButton" then
 		if IsShiftKeyDown() then
 			local dungeonDailyText = ""
-			if Reputable_Data.global.dailyDungeons[ server ].dailyNormalDungeon then
-				dungeonDailyText = Reputable.instance[ Reputable.dailyInfo[ Reputable_Data.global.dailyDungeons[ server ].dailyNormalDungeon ].instanceID ].name
+			if Reputable_Data.global.dailyTBCDungeons[ server ].dailyNormalTBCDungeon then
+				dungeonDailyText = Reputable.instance[ Reputable.dailyInfo[ Reputable_Data.global.dailyTBCDungeons[ server ].dailyNormalTBCDungeon ].instanceID ].name
 			end
-			if Reputable_Data.global.dailyDungeons[ server ].dailyHeroicDungeon then 
+			if Reputable_Data.global.dailyTBCDungeons[ server ].dailyHeroicTBCDungeon then 
 				if dungeonDailyText ~= "" then dungeonDailyText = dungeonDailyText .. " & " end
-				dungeonDailyText = dungeonDailyText .. string.gsub( HEROIC_PREFIX, "%%s", Reputable.instance[ Reputable.dailyInfo[ Reputable_Data.global.dailyDungeons[ server ].dailyHeroicDungeon ].instanceID ].name )
+				dungeonDailyText = dungeonDailyText .. string.gsub( HEROIC_PREFIX, "%%s", Reputable.instance[ Reputable.dailyInfo[ Reputable_Data.global.dailyTBCDungeons[ server ].dailyHeroicDungeon ].instanceID ].name )
+			end
+			if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyNormalWOTLKDungeon then
+				dungeonDailyText = Reputable.instance[ Reputable.dailyInfo[ Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyNormalWOTLKDungeon ].instanceID ].name
+			end
+			if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyHeroicWOTLKDungeon then 
+				if dungeonDailyText ~= "" then dungeonDailyText = dungeonDailyText .. " & " end
+				dungeonDailyText = dungeonDailyText .. string.gsub( HEROIC_PREFIX, "%%s", Reputable.instance[ Reputable.dailyInfo[ Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyHeroicDungeon ].instanceID ].name )
 			end
 			if dungeonDailyText ~= "" then
 				local resetTime = " || "..( GameTooltipTextRight1:GetText() or LibDBIconTooltipTextRight1:GetText() or "" )
 				local changeTime = ""
-				if Reputable_Data.global.dailyDungeons[ server ].dailyChangeOffset ~= 0 then 
+				if Reputable_Data.global.dailyTBCDungeons[ server ].dailyChangeOffset ~= 0 then 
+					changeTime  = " || "..( GameTooltipTextRight2:GetText() or LibDBIconTooltipTextRight2:GetText() or "" )
+				end
+				if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyChangeOffset ~= 0 then 
 					changeTime  = " || "..( GameTooltipTextRight2:GetText() or LibDBIconTooltipTextRight2:GetText() or "" )
 				end
 				dungeonDailyText = DAILY.." "..DUNGEONS.."; "..dungeonDailyText .. resetTime .. changeTime
@@ -1133,11 +1243,16 @@ local function minimapButtonOver( self, tooltip )
 	
 	Reputable:addonMessage()
 	tooltip:AddDoubleLine("|cFF8080FFReputable|r", RESET..": "..SecondsToTime(GetQuestResetTime()) )
-	if Reputable_Data.global.dailyDungeons[ server ].dailyChangeOffset ~= 0 then 
-	local nextChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyDungeons[ server ].dailyChangeOffset
-	if nextChange > 86400 then nextChange = nextChange - 86400 end
-		tooltip:AddDoubleLine( " ", AVAILABLE.." "..DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON..": "..SecondsToTime( nextChange ), 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 )
+	if Reputable_Data.global.dailyTBCDungeons[ server ].dailyTBCChangeOffset ~= 0 then 
+	local nextTBCChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyDungeons[ server ].dailyTBCChangeOffset
+	if nextTBCChange > 86400 then nextTBCChange = nextTBCChange - 86400 end
+		tooltip:AddDoubleLine( " ", AVAILABLE.." "..DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON..": "..SecondsToTime( nextTBCChange ), 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 )
 	end
+	if Reputable_Data.global.dailyWOTLKDungeons[ server ].dailyWOTLKChangeOffset ~= 0 then 
+		local nextWOTLKChange = GetQuestResetTime() + 3600 * Reputable_Data.global.dailyDungeons[ server ].dailyWOTLKChangeOffset
+		if nextWOTLKChange > 86400 then nextWOTLKChange = nextWOTLKChange - 86400 end
+			tooltip:AddDoubleLine( " ", AVAILABLE.." "..DAILY.." "..COMMUNITIES_CREATE_DIALOG_ICON_SELECTION_BUTTON..": "..SecondsToTime( nextWOTLKChange ), 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 )
+		end
 	tooltip:AddLine(" ")
 	--debug( tooltip:GetName() )
 	Reputable.addDailiesToToolTip( tooltip )
